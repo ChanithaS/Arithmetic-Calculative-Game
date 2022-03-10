@@ -16,7 +16,6 @@ class MainActivity : AppCompatActivity() {
 
         newGameBtn.setOnClickListener{
             val game = Intent(this, GameActivity::class.java)
-            game.putExtra("reset", 0)
             startActivity(game)
         }
         aboutBtn.setOnClickListener{
