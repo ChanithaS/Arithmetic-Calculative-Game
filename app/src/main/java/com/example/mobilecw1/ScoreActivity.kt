@@ -13,7 +13,7 @@ class ScoreActivity : AppCompatActivity() {
         val resultTxt = findViewById<TextView>(R.id.score)
 
         val correct =intent.getStringExtra("correct")
-        var total = intent.getStringExtra("total")
+        val total = intent.getStringExtra("total")
 
         resultTxt.text = " You Got $correct Correct of $total"
     }

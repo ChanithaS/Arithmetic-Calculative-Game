@@ -13,6 +13,7 @@ class GameActivity : AppCompatActivity() {
     private lateinit var expressionText : TextView
     private lateinit var expression2Text : TextView
     private lateinit var answerText : TextView
+    private lateinit var test : TextView
 
     private val operators = setOf("+", "-", "*", "/")
     //storing the two values for the 2 expressions
@@ -26,11 +27,11 @@ class GameActivity : AppCompatActivity() {
 
     var totalQuestions = 0
     var correctAns = 0
+    var consecutiveCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
-        endTime = System.currentTimeMillis() + timeLeft
         timer()
 
         val greaterBtn = findViewById<Button>(R.id.greater)
@@ -39,6 +40,7 @@ class GameActivity : AppCompatActivity() {
         expressionText = findViewById(R.id.expression1)
         expression2Text = findViewById(R.id.expression2)
         answerText = findViewById(R.id.answerText)
+        test = findViewById(R.id.textView)
 
         greaterBtn.setOnClickListener{
             check(1)
@@ -51,6 +53,7 @@ class GameActivity : AppCompatActivity() {
         }
         newQuestion()
     }
+
     private fun newQuestion(){
         //for two expressions
         for (i in 0..1){
@@ -64,8 +67,11 @@ class GameActivity : AppCompatActivity() {
                 exp2Ans = ans
                 expression2 = exp
                 expression2Text.text = expression2
+
             }
         }
+        println(exp1Ans)
+        println(exp2Ans)
     }
 
     private fun expressionGen(): Pair<String, Int>{
@@ -85,14 +91,13 @@ class GameActivity : AppCompatActivity() {
         val firstValue = randomVal(1, 20)
         expression.add(firstValue.toString())
         //setting up for calculating the answer
-        var value = firstValue.toDouble()
-        //setting up a count for getting the repeat count
-        var count = 0;
-        repeat(noOfTerms) {
-            count++
+        var answer = firstValue.toDouble()
 
+        //generating a operator and a value for no of terms
+        for(i in 1..noOfTerms) {
+            val storeAns = answer
             //adding a closing parenthesis if no of terms length is larger that 1
-            if(count >= 2){
+            if(i >= 2){
                 expression.add(")")
             }
 
@@ -102,16 +107,21 @@ class GameActivity : AppCompatActivity() {
             var nextValues = randomVal(1, 20)
             //calculating the answer while creating the equation step by step
             when (operator) {
-                "+" -> value += nextValues.toDouble()
-                "-" -> value -= nextValues.toDouble()
-                "*" -> value *= nextValues.toDouble()
-                else -> value /= nextValues.toDouble()
+                "+" -> answer += nextValues.toDouble()
+                "-" -> answer -= nextValues.toDouble()
+                "*" -> answer *= nextValues.toDouble()
+                else -> answer /= nextValues.toDouble()
             }
 
             //generating new terms while the sub expression is a whole number and is between 0 to 100
             var valid = false
             while (!valid){
-                if (value % 1.0 != 0.0 && value >= 0 && value <= 100){            //https://stackoverflow.com/questions/45422290/checking-if-the-output-of-a-calculation-is-a-whole-number/45422616#45422616
+                //(value % 1.0 != 0.0) &&  && value > 0.0 && value <= 100.0
+                if (answer - answer.toInt() == 0.0 && answer > 0.0 && answer <= 100.0){            //https://stackoverflow.com/questions/45422290/checking-if-the-output-of-a-calculation-is-a-whole-number/45422616#45422616
+                    //ending the loop
+                    valid = true
+                }else{
+                    answer = storeAns
                     //creating a random operator
                     operator = operators.random()
                     //creating a random term
@@ -119,14 +129,11 @@ class GameActivity : AppCompatActivity() {
 
                     //calculating the answer while creating the equation step by step
                     when (operator) {
-                        "+" -> value += nextValues.toDouble()
-                        "-" -> value -= nextValues.toDouble()
-                        "*" -> value *= nextValues.toDouble()
-                        else -> value /= nextValues.toDouble()
+                        "+" -> answer += nextValues.toDouble()
+                        "-" -> answer -= nextValues.toDouble()
+                        "*" -> answer *= nextValues.toDouble()
+                        else -> answer /= nextValues.toDouble()
                     }
-                }else{
-                    //ending the loop
-                    valid = true
                 }
             }
             //adding the generated values to the array
@@ -135,21 +142,24 @@ class GameActivity : AppCompatActivity() {
         }
 
         //returning the answer and expression without commas
-        return Pair(expression.joinToString(separator = " "), value.toInt())
+        return Pair(expression.joinToString(separator = " "), answer.toInt())
     }
 
     private fun check(buttonNo: Int){
         totalQuestions++
         if (exp1Ans > exp2Ans && buttonNo == 1){
             correctAns++
+            consecutiveCount++
             //answerText.text = "CORRECT"
             answerText.setTextColor(Color.parseColor("#00FF00"))
         }else if (exp1Ans < exp2Ans && buttonNo == 2){
             correctAns++
+            consecutiveCount++
             //answerText.text = "CORRECT"
             answerText.setTextColor(Color.parseColor("#00FF00"))
         }else if(exp1Ans == exp2Ans && buttonNo == 3){
             correctAns++
+            consecutiveCount++
             //answerText.text = "CORRECT"
             answerText.setTextColor(Color.parseColor("#00FF00"))
         }else{
@@ -157,28 +167,27 @@ class GameActivity : AppCompatActivity() {
             answerText.setTextColor(Color.parseColor("#FF0000"))
         }
 
-        if (correctAns%5 == 0){
-            timeLeft += 5
+        if (consecutiveCount == 5){
+            consecutiveCount = 0
+            timeLeft += 10000
         }
+        test.text = correctAns.toString()
         newQuestion()
     }
 
     private fun timer(){
-
-        var addTime = false
         //time to repeat every sec
         val period:Long  = 1000
 
         val timer = Timer()
         timer.scheduleAtFixedRate(object : TimerTask(){
             override fun run() {
-
                 timeLeft -= 1000
-
+                endTime = System.currentTimeMillis() + timeLeft
                 runOnUiThread( Runnable()
                 {
-                    var minutes = (timeLeft/1000)/60
-                    var seconds = (timeLeft/1000)%60
+                    val minutes = (timeLeft/1000)/60
+                    val seconds = (timeLeft/1000)%60
                     answerText.text = " $minutes:$seconds"
                     if (timeLeft.toInt() == 0){
                         finishView()
@@ -196,6 +205,8 @@ class GameActivity : AppCompatActivity() {
         outState.putString("expression2", expression2)
         outState.putInt("answer1", exp1Ans)
         outState.putInt("answer2", exp2Ans)
+        outState.putInt("consecutiveCount", consecutiveCount)
+        outState.putInt("correctAnswers", correctAns)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -206,6 +217,8 @@ class GameActivity : AppCompatActivity() {
         expression2 = savedInstanceState.getString("expression2")!!
         exp1Ans = savedInstanceState.getInt("answer1")
         exp2Ans = savedInstanceState.getInt("answer2")
+        consecutiveCount = savedInstanceState.getInt("consecutiveCount")
+        correctAns = savedInstanceState.getInt("correctAnswers")
 
         expressionText.text = expression
         expression2Text.text = expression2
