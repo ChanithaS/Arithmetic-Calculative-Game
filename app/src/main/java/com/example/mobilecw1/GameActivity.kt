@@ -2,7 +2,9 @@ package com.example.mobilecw1
 
 import android.content.Intent
 import android.graphics.Color
+import android.media.MediaPlayer
 import android.os.Bundle
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -13,7 +15,9 @@ class GameActivity : AppCompatActivity() {
     private lateinit var expressionText : TextView
     private lateinit var expression2Text : TextView
     private lateinit var answerText : TextView
-    private lateinit var test : TextView
+    private lateinit var timerText : TextView
+    private lateinit var correctSound : MediaPlayer
+    private lateinit var wrongSound : MediaPlayer
 
     private val operators = setOf("+", "-", "*", "/")
     //storing the two values for the 2 expressions
@@ -22,7 +26,7 @@ class GameActivity : AppCompatActivity() {
     var expression = ""
     var expression2 = ""
 
-    var timeLeft:Long = 50000
+    var timeLeft:Long = 15000
     var endTime:Long = 0
 
     var totalQuestions = 0
@@ -32,6 +36,7 @@ class GameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+        supportActionBar?.hide()
         timer()
 
         val greaterBtn = findViewById<Button>(R.id.greater)
@@ -39,8 +44,11 @@ class GameActivity : AppCompatActivity() {
         val equalBtn = findViewById<Button>(R.id.equal)
         expressionText = findViewById(R.id.expression1)
         expression2Text = findViewById(R.id.expression2)
-        answerText = findViewById(R.id.answerText)
-        test = findViewById(R.id.textView)
+        answerText = findViewById(R.id.answer)
+        timerText = findViewById(R.id.timer)
+
+        correctSound = MediaPlayer.create(this, R.raw.correct_sound)
+        wrongSound = MediaPlayer.create(this, R.raw.wrong_sound)
 
         greaterBtn.setOnClickListener{
             check(1)
@@ -52,6 +60,7 @@ class GameActivity : AppCompatActivity() {
             check(3)
         }
         newQuestion()
+        animation(greaterBtn, lessBtn, equalBtn)
     }
 
     private fun newQuestion(){
@@ -142,40 +151,30 @@ class GameActivity : AppCompatActivity() {
         }
 
         //returning the answer and expression without commas
-        return Pair(expression.joinToString(separator = " "), answer.toInt())
+        return Pair(expression.joinToString(separator = ""), answer.toInt())
     }
 
     private fun check(buttonNo: Int){
         totalQuestions++
         if (exp1Ans > exp2Ans && buttonNo == 1){
-            correctAns++
-            consecutiveCount++
-            //answerText.text = "CORRECT"
-            answerText.setTextColor(Color.parseColor("#00FF00"))
+            correctWrong(1)
         }else if (exp1Ans < exp2Ans && buttonNo == 2){
-            correctAns++
-            consecutiveCount++
-            //answerText.text = "CORRECT"
-            answerText.setTextColor(Color.parseColor("#00FF00"))
+            correctWrong(1)
         }else if(exp1Ans == exp2Ans && buttonNo == 3){
-            correctAns++
-            consecutiveCount++
-            //answerText.text = "CORRECT"
-            answerText.setTextColor(Color.parseColor("#00FF00"))
+            correctWrong(1)
         }else{
-            //answerText.text = "Wrong"
-            answerText.setTextColor(Color.parseColor("#FF0000"))
+            correctWrong(2)
         }
 
         if (consecutiveCount == 5){
             consecutiveCount = 0
             timeLeft += 10000
         }
-        test.text = correctAns.toString()
         newQuestion()
     }
 
     private fun timer(){
+        val zoomInOut = AnimationUtils.loadAnimation(this, R.anim.zoomin)
         //time to repeat every sec
         val period:Long  = 1000
 
@@ -184,11 +183,15 @@ class GameActivity : AppCompatActivity() {
             override fun run() {
                 timeLeft -= 1000
                 endTime = System.currentTimeMillis() + timeLeft
+                if (timeLeft.toInt() < 10000){
+                    timerText.startAnimation(zoomInOut)
+                }
                 runOnUiThread( Runnable()
                 {
                     val minutes = (timeLeft/1000)/60
                     val seconds = (timeLeft/1000)%60
-                    answerText.text = " $minutes:$seconds"
+
+                    timerText.text = String.format("%02d : %02d", minutes, seconds)
                     if (timeLeft.toInt() == 0){
                         finishView()
                     }
@@ -233,7 +236,32 @@ class GameActivity : AppCompatActivity() {
         startActivity(scoreIntent)
     }
 
+    private fun correctWrong(int : Int){
+        val fadeOut = AnimationUtils.loadAnimation(this, R.anim.fadeout)
+        if (int == 1){
+            correctAns++
+            consecutiveCount++
+            answerText.text = "CORRECT"
+            answerText.setTextColor(Color.parseColor("#00FF00"))
+            correctSound.start()
+            answerText.startAnimation(fadeOut)
+        }else{
+            answerText.text = "Wrong"
+            answerText.setTextColor(Color.parseColor("#FF0000"))
+            wrongSound.start()
+            answerText.startAnimation(fadeOut)
+        }
+    }
+
     private fun randomVal(startVal: Int, endVal: Int): Int {
         return (startVal..endVal).random()
+    }
+
+    private fun animation(greaterBtn: Button, lessBtn: Button, equalBtn: Button) {
+        val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein)
+
+        greaterBtn.startAnimation(fadeIn)
+        lessBtn.startAnimation(fadeIn)
+        equalBtn.startAnimation(fadeIn)
     }
 }
