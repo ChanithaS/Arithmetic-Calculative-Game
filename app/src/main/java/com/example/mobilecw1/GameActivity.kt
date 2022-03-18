@@ -18,7 +18,9 @@ class GameActivity : AppCompatActivity() {
     private lateinit var timerText : TextView
     private lateinit var correctSound : MediaPlayer
     private lateinit var wrongSound : MediaPlayer
+    private lateinit var timer: Timer
 
+    //storing operators in a set
     private val operators = setOf("+", "-", "*", "/")
     //storing the two values for the 2 expressions
     var exp1Ans = 0
@@ -26,19 +28,25 @@ class GameActivity : AppCompatActivity() {
     var expression = ""
     var expression2 = ""
 
+    //time the user gets to answer questions in milliseconds
     var timeLeft:Long = 15000
+    //end time to solve the delay on rotation
     var endTime:Long = 0
 
+    //total question and answers
     var totalQuestions = 0
-    var correctAns = 0
+    private var correctAns = 0
     var consecutiveCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
         supportActionBar?.hide()
+
+        //starting the timer
         timer()
 
+        //initializing the elements
         val greaterBtn = findViewById<Button>(R.id.greater)
         val lessBtn = findViewById<Button>(R.id.lesser)
         val equalBtn = findViewById<Button>(R.id.equal)
@@ -47,9 +55,11 @@ class GameActivity : AppCompatActivity() {
         answerText = findViewById(R.id.answer)
         timerText = findViewById(R.id.timer)
 
+        //loading sound effects for correct and wrong
         correctSound = MediaPlayer.create(this, R.raw.correct_sound)
         wrongSound = MediaPlayer.create(this, R.raw.wrong_sound)
 
+        //setting on click listners
         greaterBtn.setOnClickListener{
             check(1)
         }
@@ -59,7 +69,9 @@ class GameActivity : AppCompatActivity() {
         equalBtn.setOnClickListener{
             check(3)
         }
+        //generating a question
         newQuestion()
+        //starting the animation
         animation(greaterBtn, lessBtn, equalBtn)
     }
 
@@ -76,11 +88,8 @@ class GameActivity : AppCompatActivity() {
                 exp2Ans = ans
                 expression2 = exp
                 expression2Text.text = expression2
-
             }
         }
-        println(exp1Ans)
-        println(exp2Ans)
     }
 
     private fun expressionGen(): Pair<String, Int>{
@@ -97,7 +106,7 @@ class GameActivity : AppCompatActivity() {
             }
         }
         //adding the first random term
-        val firstValue = randomVal(1, 20)
+        val firstValue = Random.nextInt(1, 20)
         expression.add(firstValue.toString())
         //setting up for calculating the answer
         var answer = firstValue.toDouble()
@@ -113,7 +122,7 @@ class GameActivity : AppCompatActivity() {
             //creating a random operator
             var operator = operators.random()
             //creating a random term
-            var nextValues = randomVal(1, 20)
+            var nextValues = Random.nextInt(1, 20)
             //calculating the answer while creating the equation step by step
             when (operator) {
                 "+" -> answer += nextValues.toDouble()
@@ -134,7 +143,7 @@ class GameActivity : AppCompatActivity() {
                     //creating a random operator
                     operator = operators.random()
                     //creating a random term
-                    nextValues = randomVal(1, 20)
+                    nextValues = Random.nextInt(1, 20)
 
                     //calculating the answer while creating the equation step by step
                     when (operator) {
@@ -155,7 +164,9 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun check(buttonNo: Int){
+        //increasing the no of question given to the user
         totalQuestions++
+        //checking if the users answer is correct or wrong accordingly
         if (exp1Ans > exp2Ans && buttonNo == 1){
             correctWrong(1)
         }else if (exp1Ans < exp2Ans && buttonNo == 2){
@@ -166,35 +177,52 @@ class GameActivity : AppCompatActivity() {
             correctWrong(2)
         }
 
+        //checking if the user gets 5 answers correct
         if (consecutiveCount == 5){
+            //resetting the count so the time will add again when user gets another 5 correct answers
             consecutiveCount = 0
+            //adding 10 sec
             timeLeft += 10000
         }
+        //generating another new question
         newQuestion()
     }
 
-    private fun timer(){
+    private fun timer() {
+        //loading animation for timer
         val zoomInOut = AnimationUtils.loadAnimation(this, R.anim.zoomin)
         //time to repeat every sec
         val period:Long  = 1000
 
-        val timer = Timer()
+        //creating a java timer where the function is called for every period
+        timer = Timer()
+
         timer.scheduleAtFixedRate(object : TimerTask(){
+            //threads
             override fun run() {
+                //decreasing the time by 1sec
                 timeLeft -= 1000
+                //setting the end time by getting current real time in the device and add time left
                 endTime = System.currentTimeMillis() + timeLeft
+                //starting animation if the timer is less than 10 sec
                 if (timeLeft.toInt() < 10000){
                     timerText.startAnimation(zoomInOut)
                 }
                 runOnUiThread( Runnable()
                 {
+                    //if timer ends finishing the game
+                    if (timeLeft.toInt() <= 0){
+                        finishView()
+                        timer.cancel()
+                    }
+                    //assigning min and seconds by converting milliseconds
                     val minutes = (timeLeft/1000)/60
                     val seconds = (timeLeft/1000)%60
 
+                    //setting time to text in a format so it'll stay as 00:00
                     timerText.text = String.format("%02d : %02d", minutes, seconds)
-                    if (timeLeft.toInt() == 0){
-                        finishView()
-                    }
+                    println(timeLeft)
+                    //timerText.text = "$timeLeft"
                 })
             }
         }, 0, period)
@@ -202,6 +230,7 @@ class GameActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {         //https://www.youtube.com/watch?v=LMYQS1dqfo8
         super.onSaveInstanceState(outState)
+        //saving all the data so can restore them when after orientation change
         outState.putLong("timeLeft", timeLeft)
         outState.putLong("endTime", endTime)
         outState.putString("expression1", expression)
@@ -210,10 +239,13 @@ class GameActivity : AppCompatActivity() {
         outState.putInt("answer2", exp2Ans)
         outState.putInt("consecutiveCount", consecutiveCount)
         outState.putInt("correctAnswers", correctAns)
+        outState.putInt("totalQuestion", totalQuestions)
+        timer.cancel()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
+        //restoring all the data saved after orientation change
         timeLeft = savedInstanceState.getLong("timeLeft")
         endTime = savedInstanceState.getLong("endTime")
         expression = savedInstanceState.getString("expression1")!!
@@ -222,23 +254,31 @@ class GameActivity : AppCompatActivity() {
         exp2Ans = savedInstanceState.getInt("answer2")
         consecutiveCount = savedInstanceState.getInt("consecutiveCount")
         correctAns = savedInstanceState.getInt("correctAnswers")
+        totalQuestions = savedInstanceState.getInt("totalQuestion")
 
+        //setting the textViews the restored expressions
         expressionText.text = expression
         expression2Text.text = expression2
 
+        //getting the time left without a delay by subtraction endTime calculated before by device real time
         timeLeft = endTime - System.currentTimeMillis()
     }
 
     private fun finishView(){
+        //calling the scoreActivity while passing the no of correct answers and questions given to user
         val scoreIntent = Intent(this, ScoreActivity::class.java)
+
         scoreIntent.putExtra("correct", correctAns.toString())
         scoreIntent.putExtra("total", totalQuestions.toString())
         startActivity(scoreIntent)
     }
 
     private fun correctWrong(int : Int){
+        //loading a animation
         val fadeOut = AnimationUtils.loadAnimation(this, R.anim.fadeout)
+        //setting text,color, sound accordingly if correct or not
         if (int == 1){
+            //incrementing the no.of correct answers and consecutive count
             correctAns++
             consecutiveCount++
             answerText.text = "CORRECT"
@@ -253,11 +293,8 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    private fun randomVal(startVal: Int, endVal: Int): Int {
-        return (startVal..endVal).random()
-    }
-
     private fun animation(greaterBtn: Button, lessBtn: Button, equalBtn: Button) {
+        //setting animation for buttons on start
         val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein)
 
         greaterBtn.startAnimation(fadeIn)

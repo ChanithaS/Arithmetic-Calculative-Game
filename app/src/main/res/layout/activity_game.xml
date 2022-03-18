@@ -15,7 +15,7 @@
         android:background="@drawable/drop_shadow1"
         android:paddingEnd="30dp"
         android:text="@string/greater"
-        android:textSize="16sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/equal"
         app:layout_constraintStart_toStartOf="parent"
@@ -31,12 +31,12 @@
         android:background="@drawable/drop_shadow1"
         android:paddingEnd="30dp"
         android:text="@string/less"
-        android:textSize="16sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/equal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="0.957" />
 
     <Button
         android:id="@+id/equal"
@@ -48,7 +48,7 @@
         android:background="@drawable/drop_shadow1"
         android:paddingEnd="45dp"
         android:text="@string/equal"
-        android:textSize="20sp"
+        android:textSize="34sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -57,17 +57,17 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
-        android:layout_width="350dp"
-        android:layout_height="300dp"
+        android:layout_width="388dp"
+        android:layout_height="141dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="104dp"
+        android:layout_marginTop="224dp"
         android:background="@drawable/layout_round"
         android:elevation="20dp"
         android:orientation="vertical"
         android:outlineSpotShadowColor="#00FFDF"
         android:padding="12dip"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.491"
+        app:layout_constraintHorizontal_bias="0.478"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -75,39 +75,25 @@
             android:id="@+id/expression1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="44dp"
             android:text="((20/20)*20)+20"
+            android:textAlignment="center"
             android:textColor="#000000"
-            android:textSize="30sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.505"
+            android:textSize="22sp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/answerText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="The above expression is ....... the below one"
-            app:layout_constraintBottom_toTopOf="@+id/expression2"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.47"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/expression1"
-            app:layout_constraintVertical_bias="0.529" />
 
         <TextView
             android:id="@+id/expression2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="28dp"
             android:text="((20/20)*20)+20"
+            android:textAlignment="center"
             android:textColor="#000000"
-            android:textSize="30sp"
+            android:textSize="22sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.505"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
