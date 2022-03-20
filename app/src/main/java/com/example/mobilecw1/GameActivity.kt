@@ -12,13 +12,19 @@ import java.util.*
 import kotlin.random.Random
 
 class GameActivity : AppCompatActivity() {
+    //late initializing the elements
     private lateinit var expressionText : TextView
     private lateinit var expression2Text : TextView
     private lateinit var answerText : TextView
     private lateinit var timerText : TextView
     private lateinit var correctSound : MediaPlayer
     private lateinit var wrongSound : MediaPlayer
+
     private lateinit var timer: Timer
+    //time the user gets to answer questions in milliseconds
+    var timeLeft:Long = 50000
+    //end time to solve the delay on rotation
+    var endTime:Long = 0
 
     //storing operators in a set
     private val operators = setOf("+", "-", "*", "/")
@@ -28,11 +34,6 @@ class GameActivity : AppCompatActivity() {
     var expression = ""
     var expression2 = ""
 
-    //time the user gets to answer questions in milliseconds
-    var timeLeft:Long = 15000
-    //end time to solve the delay on rotation
-    var endTime:Long = 0
-
     //total question and answers
     var totalQuestions = 0
     private var correctAns = 0
@@ -41,6 +42,7 @@ class GameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+        //hiding action bar
         supportActionBar?.hide()
 
         //starting the timer
@@ -59,7 +61,7 @@ class GameActivity : AppCompatActivity() {
         correctSound = MediaPlayer.create(this, R.raw.correct_sound)
         wrongSound = MediaPlayer.create(this, R.raw.wrong_sound)
 
-        //setting on click listners
+        //setting on click listeners
         greaterBtn.setOnClickListener{
             check(1)
         }
@@ -75,8 +77,10 @@ class GameActivity : AppCompatActivity() {
         animation(greaterBtn, lessBtn, equalBtn)
     }
 
+    /**
+     * generate two expressions and assign the values respectively
+     */
     private fun newQuestion(){
-        //for two expressions
         for (i in 0..1){
             val (exp, ans) = expressionGen()
             //assigning values for the 2 expressions
@@ -92,6 +96,10 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     *generate the arithmetic expressions randomly
+     * @return - the expression as a string and the answer of it as int
+     */
     private fun expressionGen(): Pair<String, Int>{
         //list which holds the expression
         val expression = mutableListOf<String>()
@@ -158,11 +166,14 @@ class GameActivity : AppCompatActivity() {
             expression.add(operator)
             expression.add(nextValues.toString())
         }
-
         //returning the answer and expression without commas
         return Pair(expression.joinToString(separator = ""), answer.toInt())
     }
 
+    /**
+     *checking if the answers are correct or wrong and calling function accordingly
+     * @param buttonNo
+     */
     private fun check(buttonNo: Int){
         //increasing the no of question given to the user
         totalQuestions++
@@ -188,6 +199,9 @@ class GameActivity : AppCompatActivity() {
         newQuestion()
     }
 
+    /**
+     * timer which decreases time by 1 for every 1sec
+     */
     private fun timer() {
         //loading animation for timer
         val zoomInOut = AnimationUtils.loadAnimation(this, R.anim.zoomin)
@@ -221,16 +235,17 @@ class GameActivity : AppCompatActivity() {
 
                     //setting time to text in a format so it'll stay as 00:00
                     timerText.text = String.format("%02d : %02d", minutes, seconds)
-                    println(timeLeft)
-                    //timerText.text = "$timeLeft"
                 })
             }
         }, 0, period)
     }
 
+    /**
+     *saving all the data so can restore them when after orientation change
+     * @param outState
+     */
     override fun onSaveInstanceState(outState: Bundle) {         //https://www.youtube.com/watch?v=LMYQS1dqfo8
         super.onSaveInstanceState(outState)
-        //saving all the data so can restore them when after orientation change
         outState.putLong("timeLeft", timeLeft)
         outState.putLong("endTime", endTime)
         outState.putString("expression1", expression)
@@ -240,12 +255,16 @@ class GameActivity : AppCompatActivity() {
         outState.putInt("consecutiveCount", consecutiveCount)
         outState.putInt("correctAnswers", correctAns)
         outState.putInt("totalQuestion", totalQuestions)
+        //canceling the timer therefore multiple timers will not run after rotation
         timer.cancel()
     }
 
+    /**
+     * restoring all the data saved after orientation change
+     * @param savedInstanceState
+     */
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        //restoring all the data saved after orientation change
         timeLeft = savedInstanceState.getLong("timeLeft")
         endTime = savedInstanceState.getLong("endTime")
         expression = savedInstanceState.getString("expression1")!!
@@ -264,15 +283,21 @@ class GameActivity : AppCompatActivity() {
         timeLeft = endTime - System.currentTimeMillis()
     }
 
+    /**
+     * calling the scoreActivity which ends the game
+     */
     private fun finishView(){
-        //calling the scoreActivity while passing the no of correct answers and questions given to user
         val scoreIntent = Intent(this, ScoreActivity::class.java)
-
+        //passing the no of correct answers and questions given to user
         scoreIntent.putExtra("correct", correctAns.toString())
         scoreIntent.putExtra("total", totalQuestions.toString())
         startActivity(scoreIntent)
     }
 
+    /**
+     *setting up functions if the passed value is correct or wrong
+     * @param int - correct = 1 ,  wrong = 2
+     */
     private fun correctWrong(int : Int){
         //loading a animation
         val fadeOut = AnimationUtils.loadAnimation(this, R.anim.fadeout)
@@ -293,10 +318,16 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * setting animation for buttons on start
+     * @param greaterBtn
+     * @param lessBtn
+     * @param equalBtn
+     */
     private fun animation(greaterBtn: Button, lessBtn: Button, equalBtn: Button) {
-        //setting animation for buttons on start
+        //loading animation
         val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein)
-
+        //setting animation
         greaterBtn.startAnimation(fadeIn)
         lessBtn.startAnimation(fadeIn)
         equalBtn.startAnimation(fadeIn)

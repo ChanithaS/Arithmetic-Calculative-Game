@@ -3,4 +3,14 @@
     <string name="greater">Greater</string>
     <string name="less">Less</string>
     <string name="equal">==</string>
+    <string name="time">Time:</string>
+    <string name="new_game">New Game</string>
+    <string name="about">About</string>
+    <string name="title">\"Booo\"</string>
+    <string name="maths">Maths</string>
+    <string name="now_its_your_turn_to_scare_off_maths">now its your turn to scare off maths</string>
+    <string name="student_name">Student Name : Chanitha Sankalpana</string>
+    <string name="student_id_20200618">Student Id : 20200618</string>
+    <string name="about_description">I confirm that I understand what plagiarism is and have read and understood the section on Assessment Offences in the Essential Information for Students. The work that I have submitted is entirely my own. Any work from other authors is duly referenced and acknowledged.</string>
+    <string name="howto">The left expression is ....... the right one</string>
 </resources>

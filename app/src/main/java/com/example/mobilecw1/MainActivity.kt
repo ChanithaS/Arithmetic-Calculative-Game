@@ -3,18 +3,13 @@ package com.example.mobilecw1
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.transition.Fade
-import android.transition.Slide
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.view.animation.TranslateAnimation
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import java.util.*
-
 
 class MainActivity : AppCompatActivity() {
     //variables for elements
@@ -57,9 +52,10 @@ class MainActivity : AppCompatActivity() {
         operator7 = findViewById(R.id.operimg7)
         operator8 = findViewById(R.id.operimg8)
 
+        //starting animation
         startAnim()
 
-        //action listener for new game button to start the game
+        //action listener for new game button to start the game intent
         newGameBtn.setOnClickListener{
             val game = Intent(this, GameActivity::class.java)
             startActivity(game)
@@ -73,10 +69,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * generating a new popup window for about information
+     */
     private fun popUpWindow(){
         active = true
         //new popup window
         val window = PopupWindow(this)
+        //to set on top
         window.isFocusable
         val view = layoutInflater.inflate(R.layout.popup_window,null)
         window.contentView = view
@@ -105,7 +105,9 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    //animation
+    /**
+     * setting animation
+     */
     private fun startAnim(){
         //leading animation
         val randomMove = AnimationUtils.loadAnimation(this, R.anim.move_around)
@@ -127,17 +129,4 @@ class MainActivity : AppCompatActivity() {
         newGameBtn.startAnimation(fadeIn)
         aboutBtn.startAnimation(fadeIn)
     }
-
-//                    var translationX = (-100..100).random()
-//                    var translationY = (-100..100).random()
-//
-//
-//                    var anim = TranslateAnimation( 0f, translationX.toFloat() , 0f, translationY.toFloat() ); //Use current view position instead of `currentX` and `currentY`
-//                    anim.duration = 1000;
-//                    //anim.fillAfter = true;
-//                    newGameBtn.startAnimation(anim)
-//                    var anim1 = TranslateAnimation( translationX.toFloat(), 200f , translationY.toFloat(), 200f ); //Use current view position instead of `currentX` and `currentY`
-//                    anim.duration = 1000;
-//                    //anim.fillAfter = true;
-//                    newGameBtn.startAnimation(anim1)
 }
